@@ -1,0 +1,20 @@
+.card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.list-group-item-action:hover {
+  background-color: #f8f9fa;
+}
+
+.display-3 {
+  font-weight: bold;
+}
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}

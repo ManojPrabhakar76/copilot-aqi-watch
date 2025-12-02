@@ -1,0 +1,158 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h1 class="text-center mb-4">Air Quality Index Monitor</h1>
+      
+      <!-- Search Section -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="input-group">
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Search for a city..."
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="onSearch()"
+            />
+            <button 
+              class="btn btn-primary" 
+              (click)="onSearch()"
+              [disabled]="loading"
+            >
+              <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="error" class="alert alert-danger" role="alert">
+        {{ error }}
+      </div>
+
+      <!-- Location Results -->
+      <div *ngIf="locations.length > 0 && !selectedLocation" class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Select a Location</h5>
+        </div>
+        <div class="list-group list-group-flush">
+          <button 
+            *ngFor="let location of locations"
+            class="list-group-item list-group-item-action"
+            (click)="onSelectLocation(location)"
+          >
+            <strong>{{ location.name }}</strong>, {{ location.country }}
+            <br>
+            <small class="text-muted">Lat: {{ location.lat }}, Lon: {{ location.lon }}</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- AQI Data Card -->
+      <div *ngIf="aqiData && selectedLocation" class="card">
+        <div 
+          class="card-header text-white" 
+          [style.background-color]="getAQIColor(aqiData.aqi)"
+        >
+          <h4 class="mb-0">
+            {{ getAQIIcon(aqiData.aqi) }} {{ selectedLocation.name }}, {{ selectedLocation.country }}
+          </h4>
+        </div>
+        <div class="card-body">
+          <div class="row text-center mb-4">
+            <div class="col-md-4">
+              <h2 class="display-3">{{ aqiData.aqi }}</h2>
+              <p class="lead">Indian AQI</p>
+              <span class="badge" [style.background-color]="getAQIColor(aqiData.aqi)">
+                {{ aqiData.category }}
+              </span>
+            </div>
+            <div class="col-md-4">
+              <h3 class="mt-3">{{ aqiData.prominentPollutant }}</h3>
+              <p class="text-muted">Prominent Pollutant</p>
+            </div>
+            <div class="col-md-4">
+              <h3 class="mt-3">{{ aqiData.europeanAqi }}</h3>
+              <p class="text-muted">European AQI</p>
+              <span class="badge bg-secondary">{{ aqiData.europeanCategory }}</span>
+            </div>
+          </div>
+
+          <div class="alert alert-info">
+            <strong>Health Advisory:</strong> {{ getHealthMessage(aqiData.aqi) }}
+          </div>
+
+          <hr>
+
+          <h5 class="mb-3">Pollutant Sub-Indices (Indian AQI)</h5>
+          <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="card-title">PM2.5</h6>
+                  <p class="card-text h5">{{ aqiData.subIndices.pm2_5.toFixed(0) }}</p>
+                  <small class="text-muted">{{ aqiData.components.pm2_5.toFixed(2) }} μg/m³</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="card-title">PM10</h6>
+                  <p class="card-text h5">{{ aqiData.subIndices.pm10.toFixed(0) }}</p>
+                  <small class="text-muted">{{ aqiData.components.pm10.toFixed(2) }} μg/m³</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="card-title">O₃</h6>
+                  <p class="card-text h5">{{ aqiData.subIndices.o3.toFixed(0) }}</p>
+                  <small class="text-muted">{{ aqiData.components.o3.toFixed(2) }} μg/m³</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="card-title">NO₂</h6>
+                  <p class="card-text h5">{{ aqiData.subIndices.no2.toFixed(0) }}</p>
+                  <small class="text-muted">{{ aqiData.components.no2.toFixed(2) }} μg/m³</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="card-title">SO₂</h6>
+                  <p class="card-text h5">{{ aqiData.subIndices.so2.toFixed(0) }}</p>
+                  <small class="text-muted">{{ aqiData.components.so2.toFixed(2) }} μg/m³</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="card-title">CO</h6>
+                  <p class="card-text h5">{{ aqiData.subIndices.co.toFixed(0) }}</p>
+                  <small class="text-muted">{{ aqiData.components.co.toFixed(2) }} μg/m³</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mt-3">
+            <button class="btn btn-secondary" (click)="selectedLocation = null; aqiData = null">
+              Search Another Location
+            </button>
+          </div>
+        </div>
+        <div class="card-footer text-muted">
+          Last updated: {{ aqiData.timestamp | date:'medium' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
